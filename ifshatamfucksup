@@ -1,0 +1,200 @@
+%%cu
+
+#include <stdio.h>
+#include <stdlib.h>
+#include "cuda_runtime.h"
+#include "device_launch_parameters.h"
+
+__device__ void desc(int arr[],int i,int k,int m)
+{
+        int stack[25],stack1[25];
+        int j=0,o=0,y,u;
+        stack[j++]=m;
+        int t=m;
+        for(int p=0;;p++)
+        {
+            if(m==-1)
+                break;
+            stack[j++]=m-1;
+            m=m-1;
+        }   
+        for(int p=k;p>=i+1;p--)
+        {
+            stack1[o++]=arr[p];
+        }
+        y=k;
+        u=i;
+        int l;
+        while(j>0 && o>0)
+        {
+            m=stack[--j];
+            if(m==-1)
+            {
+                l=0;
+                continue;
+            }
+            int temp=stack1[--o];
+            int low,high;
+            if(temp<arr[0])
+            {
+                low=-1;
+            }
+            else
+            {
+                high=u-l;
+                low=0;
+                do
+                {
+                    int med=(low+high)/2;
+                    if(temp>arr[med])
+                    {
+                        low=med;
+                    }
+                    else
+                    {
+                        high=med;
+                    }
+                }while(low<high-1);
+                while(temp>=arr[low+1])
+                {
+                    low++;
+                }
+            }
+            k=y-l-m;
+            i=u-l;
+            while(i>low)
+            {
+                arr[k]=arr[i];
+                i--;
+                k--;
+                l++;
+            }  
+            arr[k]=temp;
+    }
+}
+
+__device__ void asc(int arr[],int i,int k,int m)
+{
+        int stack[25],stack1[25];
+        int j=0,o=0,y=0,u=0;
+        stack[j++]=m;
+        int t=m;
+        for(int p=0;;p++)
+        {
+            if(m==-1)
+                break;
+            stack[j++]=m-1;
+            m=m-1;
+        }   
+        for(int p=i+1;p<=k;p++)
+        {
+            stack1[o++]=arr[p];
+        }
+        y=k;
+        u=i;
+        int l;
+        while(j>0 && o>0)
+        {
+            m=stack[--j];
+            if(m==-1)
+            {
+                l=0;
+                continue;
+            }
+            int temp=stack1[--o];
+            int low,high;
+            if(temp<arr[0])
+            {
+                low=-1;
+            }
+            else
+            {
+                high=u-l;
+                low=0;
+                do
+                {
+                    int med=(low+high)/2;
+                    if(temp>arr[med])
+                    {
+                        low=med;
+                    }
+                    else
+                    {
+                        high=med;
+                    }
+                }while(low<high-1);
+                while(temp>=arr[low+1])
+                {
+                    low++;
+                }
+            }
+            k=y-l-m;
+            i=u-l;
+            while(i>low)
+            {
+                arr[k]=arr[i];
+                i--;
+                k--;
+                l++;
+            }  
+            arr[k]=temp;
+    }
+}
+
+__device__ void useme(int arr[],int n)
+{
+    int i=0;
+    int m,k;
+    while(i<n-1)
+    {
+        if(arr[i]>arr[i+1])
+        {
+            k=i+1;
+            while(arr[k]>arr[k+1] && k<n-1)
+            {
+                k++;
+            }
+            if(k!=i+1)
+            {
+                m=k-i-1;
+                desc(arr,i,k,m);
+                i=k;
+            }
+            else
+            {
+                while(arr[k]<=arr[k+1] && k<n-1 && arr[k+1]<arr[i])
+                {
+                    k++;
+                }
+                m=k-i-1;
+                asc(arr,i,k,m);
+                i=k;
+            }
+        }
+        else
+            i++;
+    }
+}
+
+int main()
+{
+    FILE* fp=fopen("usernames.csv","r");
+    char* line=NULL;
+    if(fp==NULL)
+    {
+        printf("File not found");
+    }
+    size_t len=0;
+    ssize_t read;
+    char str[100];
+    int i=0;
+     char users[50000][100];
+        while(read=getline(&line,&len,fp)!=-1)
+        {
+            strcpy(users[i++],line);
+        }    
+      if(strstr(users[31],"\r\n")==0)
+          printf("Yes");
+      else
+          printf("Error");
+}
